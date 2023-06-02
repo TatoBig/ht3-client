@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/sales"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ventas {
+  id         Int       @id @default(autoincrement())
+  fecha      DateTime? @db.DateTime(0)
+  total      Float?
+  finalizada Float?
+  usuario_id Int?
+}

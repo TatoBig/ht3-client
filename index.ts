@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { faker } from "@faker-js/faker";
+import { PrismaClient as PrismaSalesClient } from "./prisma/generated/sales";
+import { PrismaClient as PrismaUsersClient } from "./prisma/generated/users";
 
 const express = require("express");
 const dotenv = require("dotenv");
@@ -9,12 +10,18 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT;
 
-const client1 = new PrismaClient({
-  datasources: { db: { url: process.env.DB1_URL } },
+const salesClient1 = new PrismaSalesClient({
+  datasources: { db: { url: process.env.DB1_URL_SALES } },
 });
-const client2 = new PrismaClient({
-  datasources: { db: { url: process.env.DB2_URL } },
+const salesClient2 = new PrismaSalesClient({
+  datasources: { db: { url: process.env.DB2_URL_SALES } },
 });
+const usersClient1 = new PrismaUsersClient({
+  datasources: { db: { url: process.env.DB1_URL_USERS }}
+})
+const usersClient2 = new PrismaUsersClient({
+  datasources: { db: { url: process.env.DB2_URL_USERS }}
+})
 
 function sleep(ms: number) {
   return new Promise((resolve) => {
@@ -25,16 +32,20 @@ function sleep(ms: number) {
 async function main() {
   while (true) {
     await sleep(1000);
-    await client1.user.create({
+    await salesClient1.ventas.create({
       data: {
-        email: faker.internet.email(),
-        name: faker.person.firstName(),
+        fecha: faker.date.anytime(),
+        finalizada: faker.number.float(),
+        total: faker.number.float(),
+        usuario_id: 1,
       },
     });
-    await client2.user.create({
+    await salesClient2.ventas.create({
       data: {
-        email: faker.internet.email(),
-        name: faker.person.firstName(),
+        fecha: faker.date.anytime(),
+        finalizada: faker.number.float(),
+        total: faker.number.float(),
+        usuario_id: 1,
       },
     });
   }
@@ -42,13 +53,17 @@ async function main() {
 
 main()
   .then(async () => {
-    await client1.$disconnect();
-    await client2.$disconnect();
+    await salesClient1.$disconnect();
+    await salesClient2.$disconnect();
+    await usersClient1.$disconnect();
+    await usersClient2.$disconnect();
   })
   .catch(async (e) => {
     console.error(e);
-    await client1.$disconnect();
-    await client2.$disconnect();
+    await salesClient1.$disconnect();
+    await salesClient2.$disconnect();
+    await usersClient1.$disconnect();
+    await usersClient2.$disconnect();
     process.exit(1);
   });
 
